@@ -127,6 +127,10 @@ func TestManager_getNode(t *testing.T) {
 			return nil, fmt.Errorf("node %q does not exist", name)
 		}
 
+		cli.nodeByProviderIDFn = func(providerId string) (*rancher.Node, error) {
+			return &rancher.Node{Name: "worker1", ProviderID: providerId}, nil
+		}
+
 		manager := manager{client: &cli}
 		node, err := manager.getNode(&apiv1.Node{ObjectMeta: v1.ObjectMeta{Name: "worker1"}})
 		if err != nil {
@@ -142,6 +146,9 @@ func TestManager_getNode(t *testing.T) {
 		var cli clientMock
 		cli.nodeByNameAndClusterFn = func(name, cluster string) (*rancher.Node, error) {
 			return nil, fmt.Errorf("node %q does not exist", name)
+		}
+		cli.nodeByProviderIDFn = func(providerId string) (*rancher.Node, error) {
+			return nil, fmt.Errorf("node by provider id %q does not exist", providerId)
 		}
 
 		manager := manager{client: &cli}
@@ -192,6 +199,7 @@ type clientMock struct {
 	nodePoolByIDFN         func(id string) (*rancher.NodePool, error)
 	nodesByNodePoolFn      func(nodePoolID string) ([]rancher.Node, error)
 	nodeByProviderIDFn     func(providerID string) (*rancher.Node, error)
+	nodeScaleDownFn        func(node *rancher.Node) error
 	deleteNodeFn           func(id string) error
 	nodeByNameAndClusterFn func(name, cluster string) (*rancher.Node, error)
 }
@@ -222,6 +230,10 @@ func (s clientMock) DeleteNode(id string) error {
 
 func (s clientMock) NodeByNameAndCluster(name, cluster string) (*rancher.Node, error) {
 	return s.nodeByNameAndClusterFn(name, cluster)
+}
+
+func (s clientMock) NodeScaleDown(node *rancher.Node) error {
+	return s.nodeScaleDownFn(node)
 }
 
 func (s clientMock) ClusterByID(id string) (*rancher.Cluster, error) {

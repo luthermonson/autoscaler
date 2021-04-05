@@ -17,6 +17,10 @@ func TestRancherProvider_NodeGroupForNode(t *testing.T) {
 			return &rancher.Node{Name: "worker1", NodePoolID: nodePool.id}, nil
 		}
 
+		cli.nodeByProviderIDFn = func(providerId string) (*rancher.Node, error) {
+			return &rancher.Node{Name: "worker1", ProviderID: providerId, NodePoolID: nodePool.id}, nil
+		}
+
 		manager := manager{client: &cli}
 		u := rancherProvider{manager: &manager, nodePools: []*NodePool{&nodePool}}
 		np, err := u.NodeGroupForNode(&apiv1.Node{ObjectMeta: v1.ObjectMeta{Name: "worker1"}})
@@ -34,6 +38,9 @@ func TestRancherProvider_NodeGroupForNode(t *testing.T) {
 		cli.nodeByNameAndClusterFn = func(name, cluster string) (*rancher.Node, error) {
 			return nil, fmt.Errorf("node %q does not exist", name)
 		}
+		cli.nodeByProviderIDFn = func(providerId string) (*rancher.Node, error) {
+			return nil, fmt.Errorf("node by provider %q does not exist", providerId)
+		}
 
 		manager := manager{client: &cli}
 		u := rancherProvider{manager: &manager}
@@ -48,6 +55,9 @@ func TestRancherProvider_NodeGroupForNode(t *testing.T) {
 		nodePool := NodePool{id: "pool1"}
 		cli.nodeByNameAndClusterFn = func(name, cluster string) (*rancher.Node, error) {
 			return &rancher.Node{Name: "worker1", NodePoolID: "pool2"}, nil
+		}
+		cli.nodeByProviderIDFn = func(providerId string) (*rancher.Node, error) {
+			return &rancher.Node{Name: "worker1", ProviderID: providerId}, nil
 		}
 
 		manager := manager{client: &cli}
