@@ -19,6 +19,7 @@ type service interface {
 	NodesByNodePool(nodePoolID string) ([]rancher.Node, error)
 	NodeByProviderID(providerID string) (*rancher.Node, error)
 	NodeByNameAndCluster(name, cluster string) (*rancher.Node, error)
+	NodeScaleDown(node *rancher.Node) error
 	ClusterByID(id string) (*rancher.Cluster, error)
 }
 

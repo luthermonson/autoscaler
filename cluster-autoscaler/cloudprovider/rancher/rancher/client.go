@@ -100,6 +100,16 @@ func (c *Client) ResizeNodePool(id string, size int) (*NodePool, error) {
 	return &np, nil
 }
 
+// ResizeNodePool resizes the selected nodePool
+func (c *Client) NodeScaleDown(node *Node) error {
+	url := fmt.Sprintf("%s/nodes/%s?action=scaledown", c.url, node.ID, )
+	if _, err := c.doRequest(http.MethodPost, url, nil, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // NodePoolsByCluster returns all node pools by cluster.
 func (c *Client) NodePoolsByCluster(clusterID string) ([]NodePool, error) {
 	url := fmt.Sprintf("%s/clusters/%s/nodepools", c.url, clusterID)

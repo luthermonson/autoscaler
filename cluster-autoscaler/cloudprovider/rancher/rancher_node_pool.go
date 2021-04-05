@@ -80,13 +80,16 @@ func (n *NodePool) DeleteNodes(nodes []*apiv1.Node) error {
 			return err
 		}
 
-		klog.Infof("Deleting node %q - %q", rn.Name, rn.ID)
 		if rn.NodePoolID != n.id {
 			return fmt.Errorf("node: %s doesn't belong to the nodePool: %s", node.Name, n.id)
 		}
+		klog.Infof("Deleting node %q - %q", rn.Name, rn.ID)
+		if err := n.manager.client.NodeScaleDown(rn); err != nil {
+			return err
+		}
 	}
 
-	return n.DecreaseTargetSize(len(nodes))
+	return nil
 }
 
 // DecreaseTargetSize decreases the target size of the node group. This function
