@@ -111,6 +111,10 @@ func (m *manager) getNodePools() (map[string]rancher.NodePool, error) {
 }
 
 func (m *manager) getNode(node *apiv1.Node) (*rancher.Node, error) {
-	klog.Infof("Trying to get Node by ProviderID %q", node.Spec.ProviderID)
-	return m.client.NodeByProviderID(node.Spec.ProviderID)
+	if node.Spec.ProviderID != "" {
+		klog.Infof("Trying to get Node by ProviderID %q", node.Spec.ProviderID)
+		return m.client.NodeByProviderID(node.Spec.ProviderID)
+	}
+	klog.Infof("Looking up node using clusterID %q and node name %q", m.clusterID, node.Name)
+	return m.client.NodeByNameAndCluster(node.Name, m.clusterID)
 }
